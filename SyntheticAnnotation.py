@@ -4,7 +4,7 @@ from scipy.stats import spearmanr, pearsonr
 import matplotlib.pyplot as plt
 
 """
-Samples string and then samples annotation.
+A toy experiment with a synthetically generated typical set of datasets.
 """
 class SyntheticAnnotation():
     def __init__(self, size_of_dataset, number_of_datasets, inner_sample_size, outer_sample_size, number_of_cls, alpha, beta, epsilon = 0.02):

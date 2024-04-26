@@ -7,20 +7,19 @@ import matplotlib.pyplot as plt
 A toy experiment with a synthetically generated typical set of datasets.
 """
 class SyntheticAnnotation():
-    def __init__(self, size_of_dataset, number_of_datasets, inner_sample_size, outer_sample_size, number_of_cls, alpha, beta, epsilon = 0.02):
-        self.epsilon = epsilon
-        self.number_of_cls = number_of_cls  # number of annotation choices for a datapoint e.g. 2 = binary
-        self.number_of_datasets = number_of_datasets  # number of datasets
-        self.size_of_dataset = size_of_dataset  # number of datapoints in a dataset
+    def __init__(self, size_of_dataset, number_of_datasets, inner_sample_size, outer_sample_size, alpha, beta, epsilon = 0.02):
+        self.epsilon = epsilon # inequality epsilon
+        self.number_of_datasets = number_of_datasets  # number of datasets we sample from
+        self.size_of_dataset = size_of_dataset  # number of datapoints in a dataset we sample from
 
-        self.inner_sample_size = inner_sample_size  # number of times we sample from the dataset
         self.outer_sample_size = outer_sample_size  # number of times we sample a dataset
+        self.inner_sample_size = inner_sample_size  # number of times we sample from the dataset
         self.alpha = alpha  # sampling temperature for outer samples
         self.beta = beta  # sampling temperature for inner samples
 
-        self.a = np.ones(self.size_of_dataset) # instantiate a dataset
-        self.p_datapoint = dirichlet(self.alpha * self.a) # probability of a datapoint in any dataset
-        self.mean_p_datapoint = np.mean(self.p_datapoint) # mean probability of a datapoint in any dataset
+        self.a = np.ones(self.size_of_dataset) # instantiate a sample dataset
+        self.p_datapoint = dirichlet(self.alpha * self.a) # probability of a datapoint in every dataset
+        self.mean_p_datapoint = np.mean(self.p_datapoint) # mean probability of a datapoint in every dataset
 
         self.typical_samples, self.typical_labels, self.rest_samples, self.rest_labels = [], [], [], []
 
@@ -50,7 +49,7 @@ class SyntheticAnnotation():
 
         for sample in samples:
             pvals = self.get_p_sample(sample)
-            annotations = multinomial(samples[sample], pvals=pvals) # annotate the sample with human judgement
+            annotations = multinomial(samples[sample], pvals=pvals) # pval of label == p_sample
             for _ in range(annotations[0]):
                 data_samples.append(-np.log(self.p_datapoint[sample]))
                 data_labels.append(-np.log(pvals[0]))
@@ -73,7 +72,7 @@ class SyntheticAnnotation():
             if np.abs(sample + label - np.mean(all_mean_samples) - np.mean(all_mean_labels)) < self.epsilon:
                 count += 1
                 summary.append((sample, label))
-                self.typical_samples.append(sample);
+                self.typical_samples.append(sample)
                 self.typical_labels.append(label)
             else:
                 self.rest_samples.append(sample)
@@ -89,6 +88,6 @@ class SyntheticAnnotation():
 
 if __name__ == '__main__':
     SA = SyntheticAnnotation(size_of_dataset=1000, number_of_datasets=1000,  inner_sample_size=100,
-                             outer_sample_size=1000, number_of_cls=2, alpha=0.1, beta=1000)
+                             outer_sample_size=1000, alpha=0.1, beta=1000)
     SA.run_experiment()
     SA.visualise()
